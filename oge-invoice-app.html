@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OGE Invoice">
+<meta name="theme-color" content="#080809">
+<title>OGE Invoice</title>
+<style>
+:root {
+  --red:#CC2200; --redd:#AA1A00; --dark:#080809;
+  --bg:#0E0E10; --card:#151518; --brd:#232328; --brd2:#2A2A30;
+  --txt:#EEEEF0; --txt2:#888890; --txt3:#505055;
+  --grn:#30D158; --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,'SF Pro Text',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;padding-bottom:calc(68px + var(--sab))}
+
+.topbar{position:sticky;top:0;z-index:100;background:rgba(8,8,9,.88);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:.5px solid var(--brd);padding:calc(var(--sat) + 11px) 18px 11px;display:flex;align-items:center;justify-content:space-between}
+.topbar-t{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.topbar-s{font-size:11px;color:var(--txt3);margin-top:1px}
+.svd{width:7px;height:7px;border-radius:50%;background:var(--grn);opacity:0;transition:opacity .4s}
+.svd.on{opacity:1}
+
+.tabs{display:flex;background:var(--dark);border-bottom:.5px solid var(--brd);overflow-x:auto;scrollbar-width:none;padding:0 12px;gap:0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 14px;font-size:13px;font-weight:500;color:var(--txt3);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tab.on{color:var(--red);border-bottom-color:var(--red)}
+
+.page{display:none;padding:14px}
+.page.on{display:block}
+
+.card{background:var(--card);border:.5px solid var(--brd);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.ch{padding:10px 14px;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--red);border-bottom:.5px solid var(--brd);background:rgba(204,34,0,.05)}
+.cb{padding:14px}
+
+.fr{display:grid;gap:9px;margin-bottom:9px}
+.fr:last-child{margin-bottom:0}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:1fr 1fr 1fr}
+label{display:block;font-size:11px;color:var(--txt3);margin-bottom:4px;font-weight:500}
+input,textarea{width:100%;background:var(--bg);border:1px solid var(--brd2);border-radius:8px;color:var(--txt);font-size:15px;padding:10px 12px;font-family:inherit;transition:border-color .2s;-webkit-appearance:none}
+input:focus,textarea:focus{outline:none;border-color:var(--red)}
+textarea{resize:none;min-height:68px;line-height:1.5;font-size:13px}
+
+.icard{background:var(--bg);border:1px solid var(--brd2);border-radius:10px;padding:12px;margin-bottom:10px}
+.icard .ih{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.ibdg{background:var(--red);color:#fff;font-size:9.5px;font-weight:700;min-width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.birm{background:rgba(204,34,0,.12);border:none;color:var(--red);width:28px;height:28px;border-radius:7px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.bp{background:var(--red);color:#fff}
+.bp:active{background:var(--redd);transform:scale(.98)}
+.bs{background:rgba(255,255,255,.05);color:var(--txt2);border:1px dashed var(--brd2)}
+
+.hero{background:linear-gradient(135deg,#1a0500,#080200);border:1px solid rgba(204,34,0,.3);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center}
+.hero .hl{font-size:11px;color:var(--txt3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.hero .ha{font-size:38px;font-weight:700;color:#fff;letter-spacing:-1.5px}
+.hero .hs{font-size:11px;color:var(--red);margin-top:4px}
+
+.sr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--brd)}
+.sr:last-child{border:none}
+.sr .sl{font-size:13px;color:var(--txt2);flex:1;margin-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr .sv{font-size:13px;font-weight:600;color:var(--txt);flex-shrink:0}
+
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,9,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:.5px solid var(--brd);padding:6px 0 calc(6px + var(--sab));display:flex;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer;color:var(--txt3);transition:color .2s}
+.ni.on{color:var(--red)}
+.nicon{font-size:22px;line-height:1}
+.nlbl{font-size:10px;font-weight:500}
+
+.hint{font-size:11px;color:var(--txt3);text-align:center;padding:6px 0 2px}
+.vbdg{display:inline-block;background:rgba(48,209,88,.1);border:1px solid rgba(48,209,88,.3);color:var(--grn);font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;letter-spacing:.5px}
+
+.install{background:rgba(204,34,0,.08);border:1px solid rgba(204,34,0,.25);border-radius:12px;padding:14px;margin-bottom:14px;display:none}
+.install.on{display:block}
+.install h3{font-size:14px;margin-bottom:5px}
+.install p{font-size:12px;color:var(--txt2);line-height:1.6}
+.istep{display:flex;align-items:flex-start;gap:8px;margin-top:7px;font-size:12px;color:var(--txt2)}
+.isn{background:var(--red);color:#fff;min-width:18px;height:18px;border-radius:4px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;flex-shrink:0}
+
+.gap{height:10px}
+.processing{opacity:.6;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><div class="topbar-t">OGE Invoice</div><div class="topbar-s">Obsidian Global Events LLC</div></div>
+  <div class="svd" id="svd"></div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab on" onclick="go('summary')">Übersicht</div>
+  <div class="tab" onclick="go('meta')">Rechnung</div>
+  <div class="tab" onclick="go('client')">Empfänger</div>
+  <div class="tab" onclick="go('items')">Positionen</div>
+  <div class="tab" onclick="go('bank')">Zahlung</div>
+</div>
+
+<!-- SUMMARY -->
+<div class="page on" id="pg-summary">
+  <div class="gap"></div>
+  <div class="install" id="install-banner">
+    <h3>📱 Als App installieren</h3>
+    <p>Öffne diese Seite in Safari und tippe:</p>
+    <div class="istep"><div class="isn">1</div><span>Teilen-Symbol <strong>(□↑)</strong> unten in Safari</span></div>
+    <div class="istep"><div class="isn">2</div><span><strong>„Zum Home-Bildschirm"</strong> wählen</span></div>
+    <div class="istep"><div class="isn">3</div><span><strong>„Hinzufügen"</strong> — fertig!</span></div>
+  </div>
+  <div class="hero">
+    <div class="hl">Total Amount Due</div>
+    <div class="ha" id="hero-total">EUR 0,00</div>
+    <div class="hs"><span class="vbdg">0% MwSt · Reverse Charge</span></div>
+  </div>
+  <div class="card">
+    <div class="ch">Positionen</div>
+    <div class="cb" id="sum-items"></div>
+  </div>
+  <div class="card">
+    <div class="ch">Rechnungsdetails</div>
+    <div class="cb" id="sum-meta"></div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn bp" id="btn-pdf" onclick="genPDF()">⬇&nbsp; PDF Herunterladen</button>
+  <div class="hint">PDF wird direkt auf dein Gerät gespeichert</div>
+</div>
+
+<!-- META -->
+<div class="page" id="pg-meta">
+  <div class="gap"></div>
+  <div class="card">
+    <div class="ch">Rechnungsdaten</div>
+    <div class="cb">
+      <div class="fr c2">
+        <div><label>Invoice No.</label><input id="inv_no" value="OGE-2025-001"></div>
+        <div><label>Due Date</label><input id="inv_due" value="April 8, 2025"></div>
+      </div>
+      <div class="fr">
+        <div><label>Date</label><input id="inv_date" value="March 25, 2025"></div>
+      </div>
+      <div class="fr">
+        <div><label>Service Period</label><input id="inv_period" value="February / March 2025"></div>
+      </div>
+      <div class="fr">
+        <div><label>License No.</label><input id="inv_lic" value="License No.: MFZCO-2025-00123"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT -->
+<div class="page" id="pg-client">
+  <div class="gap"></div>
+  <div class="card">
+    <div class="ch">Rechnungsempfänger / Bill To</div>
+    <div class="cb">
+      <div class="fr"><div><label>Firmenname</label><input id="to_name" value="Mustermann Veranstaltungs GmbH"></div></div>
+      <div class="fr"><div><label>Straße</label><input id="to_a1" value="Musterstrasse 42"></div></div>
+      <div class="fr"><div><label>PLZ / Ort / Land</label><input id="to_a2" value="10115 Berlin, Germany"></div></div>
+      <div class="fr"><div><label>USt-ID / VAT ID</label><input id="to_vat" value="VAT ID: DE123456789"></div></div>
+      <div class="fr"><div><label>Handelsregister</label><input id="to_hr" value="HRB 12345 B, Amtsgericht Berlin-Charlottenburg"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ITEMS -->
+<div class="page" id="pg-items">
+  <div class="gap"></div>
+  <div id="items-wrap"></div>
+  <button class="btn bs" onclick="addItem()">+ Position hinzufügen</button>
+</div>
+
+<!-- BANK -->
+<div class="page" id="pg-bank">
+  <div class="gap"></div>
+  <div class="card">
+    <div class="ch">Bankverbindung</div>
+    <div class="cb">
+      <div class="fr"><div><label>Bank</label><input id="bk_name" value="WIO Bank PJSC"></div></div>
+      <div class="fr"><div><label>Account Holder</label><input id="bk_holder" value="Obsidian Global Events LLC"></div></div>
+      <div class="fr"><div><label>IBAN</label><input id="bk_iban" value="AE XX XXXX XXXX XXXX XXXX XXX"></div></div>
+      <div class="fr"><div><label>SWIFT / BIC</label><input id="bk_swift" value="XXXXXXXX"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ch">Akzeptierte Währungen</div>
+    <div class="cb" style="display:flex;gap:8px">
+      <div style="flex:1;background:var(--bg);border:1px solid var(--brd2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px">€</div><div style="font-size:11px;color:var(--txt3);margin-top:2px">EUR</div></div>
+      <div style="flex:1;background:var(--bg);border:1px solid var(--brd2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px">$</div><div style="font-size:11px;color:var(--txt3);margin-top:2px">USD</div></div>
+      <div style="flex:1;background:var(--bg);border:1px solid var(--brd2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:20px">د.إ</div><div style="font-size:11px;color:var(--txt3);margin-top:2px">AED</div></div>
+    </div>
+  </div>
+  <div class="gap"></div>
+  <button class="btn bp" onclick="genPDF()">⬇&nbsp; PDF Herunterladen</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <div class="ni on" id="nav-summary" onclick="go('summary')"><div class="nicon">📋</div><div class="nlbl">Übersicht</div></div>
+  <div class="ni" id="nav-meta" onclick="go('meta')"><div class="nicon">📄</div><div class="nlbl">Rechnung</div></div>
+  <div class="ni" id="nav-client" onclick="go('client')"><div class="nicon">🏢</div><div class="nlbl">Empfänger</div></div>
+  <div class="ni" id="nav-items" onclick="go('items')"><div class="nicon">📝</div><div class="nlbl">Positionen</div></div>
+  <div class="ni" id="nav-bank" onclick="go('bank')"><div class="nicon">💳</div><div class="nlbl">Zahlung</div></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  MINIMAL PDF ENGINE — no external dependencies
+//  Implements just enough of PDF spec to produce invoices
+// ════════════════════════════════════════════════════════
+const PDF = (() => {
+  // A4: 595.28 x 841.89 pt
+  const PW = 595.28, PH = 841.89;
+
+  function escStr(s) {
+    return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+  }
+
+  // Latin-1 safe subset — replace non-latin chars
+  function toSafe(s) {
+    return (s||'').replace(/[^\x20-\xFF]/g, c => {
+      const map = {'\u2014':'-','\u2013':'-','\u2022':'*','\u00b7':'.','\u00a0':' ','\u2019':"'"};
+      return map[c] || '?';
+    });
+  }
+
+  // Simple word-wrap
+  function wrap(text, maxWidth, fontSize, charW) {
+    const avgW = charW * fontSize;
+    const words = toSafe(text).split(' ');
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const test = cur ? cur + ' ' + w : w;
+      if (test.length * avgW > maxWidth && cur) {
+        lines.push(cur); cur = w;
+      } else { cur = test; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  function fmtEUR(n) {
+    return 'EUR ' + Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function create(data) {
+    const objs = [];
+    let objId = 0;
+    function newObj(content) { objId++; objs.push({id:objId, content}); return objId; }
+
+    // Stream content
+    const ops = [];
+    function op(...args) { ops.push(args.join(' ')); }
+
+    function setFill(r,g,b) { op(`${r/255..toFixed(3)} ${g/255..toFixed(3)} ${b/255..toFixed(3)} rg`); }
+    function setStroke(r,g,b) { op(`${r/255..toFixed(3)} ${g/255..toFixed(3)} ${b/255..toFixed(3)} RG`); }
+    function setLineW(w) { op(`${w} w`); }
+    function rect(x,y,w,h,fill) { op(`${x.toFixed(2)} ${(PH-y-h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} ${fill?'re f':'re S'}`); }
+    function line(x1,y1,x2,y2) { op(`${x1.toFixed(2)} ${(PH-y1).toFixed(2)} m ${x2.toFixed(2)} ${(PH-y2).toFixed(2)} l S`); }
+    function txt(text,x,y,size,bold) {
+      const safe = toSafe(text);
+      op('BT');
+      op(`/${bold?'F2':'F1'} ${size} Tf`);
+      op(`${x.toFixed(2)} ${(PH-y).toFixed(2)} Td`);
+      op(`(${escStr(safe)}) Tj`);
+      op('ET');
+    }
+    function txtR(text,x,y,size,bold,maxX) {
+      // right-aligned: estimate width
+      const safe = toSafe(text);
+      const avgW = bold ? 0.62 : 0.56;
+      const w = safe.length * size * avgW;
+      txt(text, maxX - w, y, size, bold);
+    }
+
+    // ── DRAW INVOICE ──
+    const ML=57, MR=57, MT=45, CW=PW-ML-MR;
+    const { inv, to, bk, items } = data;
+    const total = items.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+
+    let cy = MT;
+
+    // LOGO area
+    setFill(250,250,252); rect(ML,cy,CW*0.58,30,true);
+    setFill(204,34,0);
+    txt('OBSIDIAN', ML+5, cy+13, 15, true);
+    setFill(102,102,104);
+    txt('GLOBAL EVENTS  LLC', ML+5, cy+20, 7.5, false);
+    txt('EVENT & MARKETING AGENCY', ML+5, cy+26, 6.5, false);
+
+    // INVOICE title right
+    setFill(204,34,0);
+    txtR('INVOICE', 0, cy+18, 26, true, PW-MR);
+
+    // Invoice meta right
+    setFill(102,102,104);
+    const ix = ML+CW*0.63;
+    txt('Invoice No.', ix, cy+27, 8, true);
+    setFill(26,26,30);
+    txtR(inv.no, 0, cy+27, 8.5, false, PW-MR);
+    setFill(102,102,104);
+    txt('Date', ix, cy+36, 8, true);
+    setFill(26,26,30);
+    txtR(inv.date, 0, cy+36, 8.5, false, PW-MR);
+    setFill(102,102,104);
+    txt('Due Date', ix, cy+45, 8, true);
+    setFill(26,26,30);
+    txtR(inv.due, 0, cy+45, 8.5, true, PW-MR);
+
+    cy += 34;
+
+    // Sender
+    setFill(102,102,104);
+    txt('Meydan Free Zone,  Meydan Grandstand, 6th Floor,  Meydan Road, Nad Al Sheba 1,  Dubai, UAE', ML, cy, 7.5, false);
+    cy += 10;
+    txt('events@obsidian-global.ae   -   +971 XX XXX XXXX', ML, cy, 7.5, false);
+    cy += 8;
+
+    // Red rule
+    setStroke(204,34,0); setLineW(1.2); line(ML,cy,ML+CW,cy); cy+=12;
+
+    // Bill To | Meta
+    const cw2 = CW/2;
+    setFill(204,34,0);
+    txt('BILL TO / RECHNUNGSEMPFANGER', ML, cy, 7, true);
+    txt('INVOICE / RECHNUNG', ML+cw2+5, cy, 7, true);
+    cy+=10;
+    const by = cy;
+
+    setFill(26,26,30);
+    txt(to.name, ML, cy, 10, true); cy+=12;
+    setFill(26,26,30);
+    txt(to.a1, ML, cy, 9, false); cy+=9;
+    txt(to.a2, ML, cy, 9, false); cy+=12;
+    setFill(102,102,104);
+    txt(to.vat, ML, cy, 8, false); cy+=8;
+    txt(to.hr, ML, cy, 8, false);
+    const byEnd = cy+5;
+
+    // Meta right
+    let my = by; const lh=10;
+    const metaItems = [
+      ['Invoice No.:', inv.no, false],
+      ['Date:', inv.date, false],
+      ['Service Period:', inv.period, false],
+      ['Due Date:', inv.due, true],
+    ];
+    metaItems.forEach(([label, val, bold]) => {
+      setFill(26,26,30); txt(label, ML+cw2+5, my, 8.5, true);
+      if(bold) setFill(204,34,0); else setFill(26,26,30);
+      txtR(val, 0, my, 8.5, bold, PW-MR); my+=lh;
+    });
+    setFill(102,102,104);
+    txt(inv.lic, ML+cw2+5, my, 7.5, false);
+
+    // Divider vertical
+    setStroke(200,200,200); setLineW(0.4);
+    line(ML+cw2, by-3, ML+cw2, byEnd+15);
+
+    cy = byEnd+16;
+    setStroke(200,200,200); setLineW(0.5); line(ML,cy,ML+CW,cy); cy+=10;
+
+    // Items table
+    const C0=CW*0.046,C1=CW*0.505,C2=CW*0.095,C3=CW*0.165,C4=CW*0.189;
+    const X0=ML,X1=X0+C0,X2=X1+C1,X3=X2+C2,X4R=ML+CW;
+
+    // Header
+    setFill(8,8,9); rect(ML,cy,CW,14,true);
+    setFill(240,240,242);
+    txt('#',X0+2,cy+9.5,8,true);
+    txt('Description',X1+3,cy+9.5,8,true);
+    txt('Qty / Unit',X2+3,cy+9.5,8,true);
+    txtR('Unit Price',0,cy+9.5,8,true,X4R-C4-2);
+    txtR('Amount (EUR)',0,cy+9.5,8,true,X4R-2);
+    cy+=14;
+
+    // Item rows
+    items.forEach((it,idx)=>{
+      const bg = idx%2===0 ? [255,255,255] : [242,242,244];
+      const descLines = wrap(it.desc||'', C1-6, 7.5, 0.52);
+      const rowH = Math.max(descLines.length*9+10, 18);
+      setFill(...bg); rect(ML,cy,CW,rowH,true);
+      setStroke(220,220,222); setLineW(0.2); line(ML,cy,ML+CW,cy);
+      const ty=cy+9;
+      setFill(102,102,104); txt(String(idx+1).padStart(2,'0'),X0+2,ty,8.5,false);
+      setFill(26,26,30); txt(it.title||'',X1+3,ty,9,true);
+      setFill(102,102,104);
+      descLines.forEach((l,li) => txt(l,X1+3,ty+8+li*9,7.5,false));
+      txt(it.qty||'',X2+3,ty,8.5,false);
+      txtR(it.rate||'',0,ty,8.5,false,X4R-C4-2);
+      setFill(26,26,30); txtR(fmtEUR(it.amount),0,ty,9,true,X4R-2);
+      cy+=rowH;
+    });
+    setStroke(220,220,222); setLineW(0.2); line(ML,cy,ML+CW,cy); cy+=8;
+
+    // Subtotal
+    setFill(242,242,244); rect(ML,cy,CW,13,true);
+    setStroke(200,200,200); setLineW(0.4); line(ML,cy,ML+CW,cy);
+    setFill(102,102,104); txt('Subtotal (net)', ML+CW*0.7, cy+9, 9, false);
+    setFill(26,26,30); txtR(fmtEUR(total),0,cy+9,9.5,true,PW-MR);
+    cy+=13;
+
+    // VAT
+    setFill(242,242,244); rect(ML,cy,CW,13,true);
+    setFill(160,160,162); txt('VAT (0% - Reverse Charge, Art.196 EU VAT Directive / §13b UStG)', ML+CW*0.19, cy+9, 7.5, false);
+    txtR('EUR 0,00',0,cy+9,8,false,PW-MR);
+    cy+=14;
+
+    // Total bar
+    setFill(8,8,9); rect(ML,cy,CW*0.73,16,true);
+    setFill(204,34,0); rect(ML+CW*0.73,cy,CW*0.27,16,true);
+    setFill(255,255,255);
+    txt('TOTAL AMOUNT DUE', ML+5, cy+11, 11, true);
+    txtR(fmtEUR(total),0,cy+11,12,true,PW-MR);
+    cy+=22;
+
+    // Tax note
+    setFill(204,34,0); txt('Tax Note / Steuerlicher Hinweis', ML, cy, 7.5, true); cy+=9;
+    setFill(26,26,30); txt('Steuerschuldnerschaft des Leistungsempfangers gemass §13b UStG (Reverse Charge).', ML, cy, 8.5, true); cy+=10;
+    setFill(102,102,104);
+    const taxLines = wrap('Tax liability transfers to the recipient pursuant to Art.196 EU VAT Directive 2006/112/EC and §13b German VAT Act (Reverse Charge). No VAT is charged. The recipient must declare and remit VAT in Germany.', CW, 8.5, 0.52);
+    taxLines.forEach(l=>{txt(l,ML,cy,8.5,false);cy+=10;}); cy+=6;
+
+    // Payment
+    setFill(204,34,0); txt('Payment Details / Zahlungsdetails', ML, cy, 7.5, true); cy+=8;
+    const PL=CW*0.30;
+    const prows=[
+      ['Bank / Institution',bk.name,false],
+      ['Account Holder',bk.holder,false],
+      ['IBAN',bk.iban,false],
+      ['SWIFT / BIC',bk.swift,false],
+      ['Currency','\x45\x55\x52  -  USD  -  AED',false],
+      ['Reference','Invoice '+inv.no,false],
+      ['Payment Due',inv.due,true],
+    ];
+    const tph=prows.length*12+8;
+    setFill(242,242,244); rect(ML,cy,CW,tph,true);
+    prows.forEach((r,i)=>{
+      const ry=cy+9+i*12;
+      setFill(102,102,104); txt(r[0],ML+3,ry,8,true);
+      if(r[2]) setFill(204,34,0); else setFill(26,26,30);
+      txt(r[1],ML+PL+3,ry,8.5,r[2]);
+    });
+    setStroke(200,200,200); setLineW(0.3);
+    line(ML+PL,cy,ML+PL,cy+tph); cy+=tph+10;
+
+    // Footer
+    setStroke(204,34,0); setLineW(0.8); line(ML,cy,ML+CW,cy); cy+=9;
+    setFill(160,160,162);
+    const ft = toSafe('Obsidian Global Events LLC  -  Meydan Grandstand, 6th Floor, Dubai UAE  -  '+inv.lic+'  -  events@obsidian-global.ae');
+    const ftW = ft.length * 6 * 0.52;
+    txt(ft, ML+(CW-ftW)/2, cy, 6, false);
+
+    // ── BUILD PDF BYTES ──
+    const stream = ops.join('\n');
+    const streamBytes = unescape(encodeURIComponent(stream));
+
+    const catalog = newObj('<<\n/Type /Catalog\n/Pages 2 0 R\n>>');
+    const pages   = newObj(''); // placeholder
+    const font1   = newObj('<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n/Encoding /WinAnsiEncoding\n>>');
+    const font2   = newObj('<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica-Bold\n/Encoding /WinAnsiEncoding\n>>');
+    const resId   = newObj(`<<\n/Font << /F1 ${font1} 0 R /F2 ${font2} 0 R >>\n>>`);
+    const strmId  = objId+1;
+    const page    = newObj(`<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 ${PW} ${PH}]\n/Contents ${strmId} 0 R\n/Resources ${resId} 0 R\n>>`);
+    const streamObj = newObj(`<<\n/Length ${streamBytes.length}\n>>\nstream\n${stream}\nendstream`);
+
+    // Update pages obj
+    objs[1].content = `<<\n/Type /Pages\n/Kids [${page} 0 R]\n/Count 1\n>>`;
+
+    // Serialize
+    let out = '%PDF-1.4\n';
+    const offsets = [];
+    objs.forEach(o => {
+      offsets.push(out.length);
+      out += `${o.id} 0 obj\n${o.content}\nendobj\n`;
+    });
+    const xrefPos = out.length;
+    out += 'xref\n';
+    out += `0 ${objs.length+1}\n`;
+    out += '0000000000 65535 f \n';
+    offsets.forEach(off => { out += String(off).padStart(10,'0') + ' 00000 n \n'; });
+    out += 'trailer\n<<\n/Size '+(objs.length+1)+'\n/Root 1 0 R\n>>\n';
+    out += `startxref\n${xrefPos}\n%%EOF`;
+
+    return out;
+  }
+
+  function download(data, filename) {
+    const pdf = create(data);
+    const bytes = new Uint8Array(pdf.length);
+    for(let i=0;i<pdf.length;i++) bytes[i]=pdf.charCodeAt(i)&0xff;
+    const blob = new Blob([bytes],{type:'application/pdf'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url; a.download=filename; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  return { download };
+})();
+
+// ════════════════════════════════════════════════════════
+//  APP LOGIC
+// ════════════════════════════════════════════════════════
+const SKEY = 'oge-inv-v4';
+const TABS = ['summary','meta','client','items','bank'];
+const FIELDS = ['inv_no','inv_date','inv_due','inv_period','inv_lic','to_name','to_a1','to_a2','to_vat','to_hr','bk_name','bk_holder','bk_iban','bk_swift'];
+
+const DEFS = [
+  {title:'Strategic Consulting',desc:'Provision of strategic advisory services including situation analysis, development of business strategies, market positioning and preparation of decision-making documents',qty:'8 hrs',rate:'EUR 350,00',amount:2800},
+  {title:'Brokerage & Referral Fee - Event Venue',desc:'Brokerage fee for successful placement and negotiation of a suitable event venue; fee based on 10% of confirmed venue contract value of EUR 12,000.00',qty:'1 flat',rate:'EUR 1.200,00',amount:1200},
+  {title:'Brokerage & Referral Fee - Service Providers',desc:'Referral and coordination fee for placement of qualified service providers (catering, AV technology, event security); covers qualification, briefing and contract support',qty:'1 flat',rate:'EUR 1.800,00',amount:1800},
+  {title:'Consulting - Regulatory & Compliance',desc:'Advisory services on event permit requirements, regulatory compliance for public gatherings in Germany, coordination with relevant authorities',qty:'4 hrs',rate:'EUR 350,00',amount:1400},
+  {title:'Travel & Out-of-Pocket Expenses',desc:'Reimbursement of travel expenses per receipts (flight, accommodation, transfers) - 2 persons, service period March 12-14, 2025',qty:'1 flat',rate:'EUR 980,00',amount:980},
+];
+
+let items = [];
+let curTab = 'summary';
+
+function go(tab) {
+  TABS.forEach(t => {
+    document.getElementById('pg-'+t).classList.toggle('on', t===tab);
+    document.querySelectorAll('.tab')[TABS.indexOf(t)].classList.toggle('on', t===tab);
+    document.getElementById('nav-'+t).classList.toggle('on', t===tab);
+  });
+  curTab = tab;
+  if(tab==='summary') updateSummary();
+  window.scrollTo(0,0);
+}
+
+// Storage
+async function load() {
+  try {
+    const r = await window.storage.get(SKEY);
+    if(r) {
+      const d = JSON.parse(r.value);
+      FIELDS.forEach(id=>{ if(d[id]!=null) document.getElementById(id).value=d[id]; });
+      items = d.items?.length ? d.items : JSON.parse(JSON.stringify(DEFS));
+    } else { items = JSON.parse(JSON.stringify(DEFS)); }
+  } catch(e) { items = JSON.parse(JSON.stringify(DEFS)); }
+  renderItems(); updateSummary();
+  // Show install hint in Safari iOS (not standalone)
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  if(isIOS && isSafari && !window.navigator.standalone) {
+    document.getElementById('install-banner').classList.add('on');
+  }
+}
+
+let st;
+async function save() {
+  const d = { items };
+  FIELDS.forEach(id => d[id] = document.getElementById(id)?.value||'');
+  try {
+    await window.storage.set(SKEY, JSON.stringify(d));
+    const dot = document.getElementById('svd');
+    dot.classList.add('on'); setTimeout(()=>dot.classList.remove('on'),1500);
+  } catch(e){}
+}
+function sched(){ clearTimeout(st); st=setTimeout(()=>{save();updateSummary();},600); }
+document.addEventListener('input', e => {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') sched();
+});
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function renderItems() {
+  const w = document.getElementById('items-wrap');
+  w.innerHTML='';
+  items.forEach((it,i)=>{
+    const d=document.createElement('div');
+    d.className='icard';
+    d.innerHTML=`<div class="ih">
+      <div class="ibdg">${String(i+1).padStart(2,'0')}</div>
+      <input style="flex:1;font-size:14px;padding:7px 10px" placeholder="Titel" value="${esc(it.title)}" oninput="items[${i}].title=this.value;sched()">
+      ${items.length>1?`<button class="birm" onclick="rmItem(${i})">×</button>`:''}
+    </div>
+    <div class="fr"><div><label>Beschreibung</label><textarea oninput="items[${i}].desc=this.value;sched()">${esc(it.desc)}</textarea></div></div>
+    <div class="fr c3">
+      <div><label>Menge</label><input value="${esc(it.qty)}" oninput="items[${i}].qty=this.value;sched()"></div>
+      <div><label>Rate</label><input value="${esc(it.rate)}" oninput="items[${i}].rate=this.value;sched()"></div>
+      <div><label>Betrag €</label><input type="number" step="0.01" inputmode="decimal" value="${it.amount}" oninput="items[${i}].amount=parseFloat(this.value)||0;sched()"></div>
+    </div>`;
+    w.appendChild(d);
+  });
+  updateSummary();
+}
+
+function addItem(){ items.push({title:'',desc:'',qty:'1 flat',rate:'EUR 0,00',amount:0}); renderItems(); sched(); setTimeout(()=>document.querySelectorAll('.icard')[items.length-1]?.scrollIntoView({behavior:'smooth',block:'center'}),100); }
+function rmItem(i){ items.splice(i,1); renderItems(); sched(); }
+
+function fE(n){ return 'EUR '+Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function g(id){ return document.getElementById(id)?.value||''; }
+
+function updateSummary() {
+  const total=items.reduce((s,i)=>s+(parseFloat(i.amount)||0),0);
+  document.getElementById('hero-total').textContent=fE(total);
+  document.getElementById('sum-items').innerHTML=
+    items.map(it=>`<div class="sr"><span class="sl">${it.title||'(leer)'}</span><span class="sv">${fE(it.amount)}</span></div>`).join('')+
+    `<div class="sr"><span class="sl" style="color:var(--txt);font-weight:600">Summe netto</span><span class="sv" style="color:var(--txt)">${fE(total)}</span></div>`;
+  document.getElementById('sum-meta').innerHTML=`
+    <div class="sr"><span class="sl">Invoice No.</span><span class="sv">${g('inv_no')}</span></div>
+    <div class="sr"><span class="sl">Date</span><span class="sv">${g('inv_date')}</span></div>
+    <div class="sr"><span class="sl">Due Date</span><span class="sv" style="color:var(--red)">${g('inv_due')}</span></div>
+    <div class="sr"><span class="sl">Period</span><span class="sv">${g('inv_period')}</span></div>
+    <div class="sr"><span class="sl">Bill To</span><span class="sv">${g('to_name')}</span></div>`;
+}
+
+function genPDF() {
+  const btn = document.getElementById('btn-pdf');
+  if(btn) { btn.classList.add('processing'); btn.textContent='Generiere PDF...'; }
+  setTimeout(()=>{
+    try {
+      PDF.download({
+        inv:{ no:g('inv_no'), date:g('inv_date'), period:g('inv_period'), due:g('inv_due'), lic:g('inv_lic') },
+        to: { name:g('to_name'), a1:g('to_a1'), a2:g('to_a2'), vat:g('to_vat'), hr:g('to_hr') },
+        bk: { name:g('bk_name'), holder:g('bk_holder'), iban:g('bk_iban'), swift:g('bk_swift') },
+        items,
+      }, 'Invoice_'+g('inv_no').replace(/[^a-zA-Z0-9-]/g,'_')+'.pdf');
+    } catch(e){ alert('Fehler: '+e.message); }
+    if(btn) { btn.classList.remove('processing'); btn.innerHTML='&#11015;&nbsp; PDF Herunterladen'; }
+  },100);
+}
+
+load();
+</script>
+</body>
+</html>
