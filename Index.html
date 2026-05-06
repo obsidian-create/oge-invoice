@@ -1513,12 +1513,14 @@ function saveInvoice(status) {
   DB.save();
   toast('Invoice saved ✓', 'success');
   updateBadges();
+  if (status) navigate('invoices');
 }
 
 function printCurrentInvoice() {
   saveInvoice(null);
   const html = buildInvoiceHTML(editorState);
   const win = window.open('', '_blank');
+  if (!win) { toast('Popup blockiert — bitte Popups für diese Seite erlauben', 'error'); return; }
   win.document.write(`<!DOCTYPE html><html><head>
     <meta charset="UTF-8">
     <title>Invoice ${editorState.number}</title>
